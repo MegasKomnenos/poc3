@@ -1,7 +1,4 @@
 use amethyst::{
-    ecs::{
-        World, WorldExt,
-    },
     input::{
         is_close_requested, is_key_down,
     },
@@ -22,7 +19,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for TestState {
 
         self.ui_manager = Some(
             UiManager::default()
-                .add(TestUi, false)
+                .add(TestUi, true)
                 .build(world),
         );
     }

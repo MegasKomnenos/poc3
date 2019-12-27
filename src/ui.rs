@@ -16,10 +16,10 @@ pub trait ImguiDrawable: std::fmt::Debug + Send + Sync {
 
     fn setup(&mut self, _world: &mut World) {}
 
-    fn draw(&mut self, ui: &imgui::Ui, world: &mut World);
+    fn draw(&mut self, ui: &imgui::Ui, world: &mut World, open: &mut bool);
 
-    fn on_toggle_hidden(&mut self, hidden: bool) -> bool {
-        hidden
+    fn on_toggle_open(&mut self, open: bool) -> bool {
+        open
     }
 }
 
@@ -30,14 +30,11 @@ impl ImguiDrawable for TestUi {
         "TestUi"
     }
 
-    fn draw(&mut self, ui: &imgui::Ui, _world: &mut World) {
+    fn draw(&mut self, ui: &imgui::Ui, _world: &mut World, open: &mut bool) {
         imgui::Window::new(im_str!("Hello world"))
+            .opened(open)
             .size([300.0, 100.0], Condition::FirstUseEver)
             .build(ui, || {
-                ui.text(im_str!("Hello world!"));
-                ui.text(im_str!("こんにちは世界！"));
-                ui.text(im_str!("This...is...imgui-rs!"));
-                ui.separator();
                 let mouse_pos = ui.io().mouse_pos;
                 ui.text(format!(
                     "Mouse Position: ({:.1},{:.1})",
@@ -65,7 +62,7 @@ pub struct WindowId(usize);
 pub struct Window {
     id: WindowId,
     inner: Box<dyn ImguiDrawable>,
-    hidden: bool,
+    open: bool,
 }
 
 #[derive(Default)]
@@ -76,10 +73,11 @@ impl UiManager {
     pub fn draw(&mut self, ui: &imgui::Ui, world: &mut World) {
         self.windows
             .iter_mut()
-            .for_each(|(_, window)| window.inner.draw(ui, world));
+            .filter(|(_, window)| window.open)
+            .for_each(|(_, window)| window.inner.draw(ui, world, &mut window.open));
     }
 
-    pub fn add<W>(mut self, window: W, hidden: bool) -> Self
+    pub fn add<W>(mut self, window: W, open: bool) -> Self
     where
         W: 'static + ImguiDrawable,
     {
@@ -88,7 +86,7 @@ impl UiManager {
             window.name(),
             Window {
                 inner: Box::new(window),
-                hidden,
+                open,
                 id,
             },
         );
@@ -106,7 +104,7 @@ impl UiManager {
 
     pub fn open(&mut self, name: &str) -> Result<(), failure::Error> {
         if let Some(window) = self.windows.get_mut(name) {
-            window.hidden = window.inner.on_toggle_hidden(false);
+            window.open = window.inner.on_toggle_open(true);
             Ok(())
         } else {
             Err(failure::format_err!("Invalid window"))
@@ -115,7 +113,7 @@ impl UiManager {
 
     pub fn hide(&mut self, name: &str) -> Result<(), failure::Error> {
         if let Some(window) = self.windows.get_mut(name) {
-            window.hidden = window.inner.on_toggle_hidden(true);
+            window.open = window.inner.on_toggle_open(false);
             Ok(())
         } else {
             Err(failure::format_err!("Invalid window"))
