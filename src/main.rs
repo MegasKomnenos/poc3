@@ -1,3 +1,6 @@
+mod ui;
+mod state;
+
 use amethyst::{
     prelude::*,
     input::{
@@ -15,11 +18,7 @@ use amethyst_imgui::{
     RenderImgui,
 };
 
-struct MyState;
-
-impl SimpleState for MyState {
-    fn on_start(&mut self, _data: StateData<'_, GameData<'_, '_>>) {}
-}
+use state::TestState;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
@@ -41,7 +40,7 @@ fn main() -> amethyst::Result<()> {
                 .with_plugin(RenderImgui::<StringBindings>::default()),
         )?;
 
-    let mut game = Application::new("/", MyState, game_data)?;
+    let mut game = Application::new("/", TestState::default(), game_data)?;
     game.run();
 
     Ok(())

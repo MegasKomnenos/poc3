@@ -5,9 +5,11 @@ use amethyst::{
 };
 use amethyst_imgui::{
     imgui::{
-        self, im_str, ImString,
+        self, im_str, ImString, Condition,
     },
 };
+
+use std::collections::HashMap;
 
 pub trait ImguiDrawable: std::fmt::Debug + Send + Sync {
     fn name(&self) -> &'static str;
@@ -21,8 +23,31 @@ pub trait ImguiDrawable: std::fmt::Debug + Send + Sync {
     }
 }
 
+#[derive(Debug, Default)]
+pub struct TestUi;
+impl ImguiDrawable for TestUi {
+    fn name(&self) -> &'static str {
+        "TestUi"
+    }
+
+    fn draw(&mut self, ui: &imgui::Ui, _world: &mut World) {
+        imgui::Window::new(im_str!("Hello world"))
+            .size([300.0, 100.0], Condition::FirstUseEver)
+            .build(ui, || {
+                ui.text(im_str!("Hello world!"));
+                ui.text(im_str!("こんにちは世界！"));
+                ui.text(im_str!("This...is...imgui-rs!"));
+                ui.separator();
+                let mouse_pos = ui.io().mouse_pos;
+                ui.text(format!(
+                    "Mouse Position: ({:.1},{:.1})",
+                    mouse_pos[0], mouse_pos[1]
+                ));
+            });
+    }
+}
+
 #[derive(
-    Shrinkwrap,
     Default,
     Copy,
     Clone,

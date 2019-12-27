@@ -2056,6 +2056,7 @@ version = "0.1.0"
 dependencies = [
  "amethyst 0.13.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "amethyst-imgui 0.6.0 (git+https://github.com/amethyst/amethyst-imgui.git)",
+ "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "ron 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
